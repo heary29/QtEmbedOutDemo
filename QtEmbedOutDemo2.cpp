@@ -56,7 +56,7 @@ void QtEmbedOutDemo::initIpc()
 	if (m_pfthrd)
 	{
 		QObject::connect(m_pfthrd, SIGNAL(EmbedThreadSignal(QString)), this, SLOT(on_revDataFunc(QString)), Qt::QueuedConnection);
-		m_pfthrd->start();
+		//m_pfthrd->start();
 	}
 }
 
