@@ -1,4 +1,5 @@
 #include "QtEmbedOutDemo.h"
+#include "QtEmbedOutDemo1.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char *argv[])
@@ -7,10 +8,8 @@ int main(int argc, char *argv[])
 	QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 	QApplication a(argc, argv);
-	//QtEmbedOutDemo* w = new QtEmbedOutDemo();
-	//w->startEmbed(nullptr);
-	//w->show();
 
+	//QtEmbedOutDemo1 w;
 	QtEmbedOutDemo w;
 	w.startEmbed(nullptr);
 	w.show();

@@ -49,6 +49,9 @@
     <ClCompile Include="EmbedThreadSev.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="QtEmbedOutDemo1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="getWindowUtil.h">
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="EmbedThreadSev.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="QtEmbedOutDemo1.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

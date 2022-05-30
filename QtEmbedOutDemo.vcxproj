@@ -99,6 +99,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="QtEmbedOutDemo1.cpp" />
     <QtRcc Include="QtEmbedOutDemo.qrc" />
     <QtUic Include="QtEmbedOutDemo.ui" />
     <QtMoc Include="QtEmbedOutDemo.h" />
@@ -109,6 +110,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="QtEmbedOutDemo1.h" />
     <QtMoc Include="EmbedThreadSev.h" />
     <QtMoc Include="EmbedThread.h" />
     <ClInclude Include="getWindowUtil.h" />

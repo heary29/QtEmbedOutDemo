@@ -21,17 +21,12 @@ public:
 
 signals:
    void updateEmbedThread();
-   void updateFusionError();
-   void updateFusionError2();
-   void startEmbed(qint64 _chlidProcessid);
 	
 public slots:
-    void on_processStarted(qint64 _chlidProcessid);
+    void on_processStarted();
     void on_sendClicked();
     void on_revDataFunc(QString msg);
 
-public:
-    void closeEvent(QCloseEvent* event);
 private:
 	bool _launchExternalSoftware(QString exePath);
     void _clearProcessByProcessName(qint64 processid);
@@ -43,7 +38,5 @@ private:
     QProcess* m_process;
     QWindow* m_window;
     QWidget* m_widget;
-    BOOL     startret;
-    qint64   m_chlidProcessid;
-	PROCESS_INFORMATION pi;
+   // WId    wid;
 };

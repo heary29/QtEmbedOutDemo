@@ -1,6 +1,7 @@
 #include "QtEmbedOutDemo.h"
 #include "getWindowUtil.h"
 #include <qDebug>
+#include <QDir>
 
 
 QtEmbedOutDemo::QtEmbedOutDemo(QWidget *parent)
@@ -8,43 +9,34 @@ QtEmbedOutDemo::QtEmbedOutDemo(QWidget *parent)
 {
     ui.setupUi(this);
 	m_process = nullptr;
-	startret = FALSE;
-	m_chlidProcessid = 0;
 	initIpc();
 }
 
 QtEmbedOutDemo::~QtEmbedOutDemo()
 {
-	//_clearProcessByProcessName();
-	TerminateProcess(pi.hProcess, 0);//终止进程
-	::CloseHandle(pi.hThread);
-	::CloseHandle(pi.hProcess);
-
-	//_clearProcessByProcessName(m_chlidProcessid);
-
-	/*if (m_process)
+	if (m_process)
 	{
-		m_process->terminate();
+		_clearProcessByProcessName(m_process->processId());
 		delete m_process;
 		m_process = nullptr;
-	}*/
-	
+	}
+
 	if (m_pfthrd)
 	{
 		m_pfthrd->Stop();
 		m_pfthrd->exit(0);
 		m_pfthrd->terminate();
-		//m_pfthrd->wait();
+		m_pfthrd->wait();
 	}
-		
+
 	if (m_pfthrdsev)
 	{
 		m_pfthrdsev->Stop();
 		m_pfthrdsev->exit(0);
 		m_pfthrdsev->terminate();
-	}
-		
+		m_pfthrd->wait();
 
+	}
 }
 
 void QtEmbedOutDemo::initIpc()
@@ -57,7 +49,7 @@ void QtEmbedOutDemo::initIpc()
 	{
 		//QObject::connect(this, SIGNAL(fusionCreateThreadSev()), m_pfthrdsev, SLOT(FusionThreadSevCreate()), Qt::QueuedConnection);
 		QObject::connect(this, SIGNAL(updateEmbedThread()), m_pfthrdsev, SLOT(EmbedThreadSevSlotSend()), Qt::QueuedConnection);
-		QObject::connect(this, SIGNAL(updateFusionError()), m_pfthrdsev, SLOT(EmbedThreadSevSlotSevEnd()), Qt::QueuedConnection);
+		//QObject::connect(m_pfthrdsev, SIGNAL(updateFusionError(QString)), this, SLOT(showTestMsg(QString)), Qt::QueuedConnection);
 		m_pfthrdsev->start();
 	}
 
@@ -66,20 +58,20 @@ void QtEmbedOutDemo::initIpc()
 	if (m_pfthrd)
 	{
 		QObject::connect(m_pfthrd, SIGNAL(EmbedThreadSignal(QString)), this, SLOT(on_revDataFunc(QString)), Qt::QueuedConnection);
-		QObject::connect(this, SIGNAL(updateFusionError2()), m_pfthrd, SLOT(EmbedThreadSlotEnd()), Qt::QueuedConnection);
 		//m_pfthrd->start();
 	}
 }
 
 bool QtEmbedOutDemo::startEmbed(QString exePath)
 {
-	//QString exePaths = "D:/Notepad++/notepad++.exe";
-	//QString exePaths = "D:/Everything/Everything.exe";
 	//QString exePaths = "D:\\CMake\\bin\\cmake-gui.exe";
 	//QString exePaths = "C:\\Users\\yangchunhai-ls\\Desktop\\Release0523\\Release\\MeshLab\\meshlab.exe";
 	//QString exePaths = "E:\\Codes\\meshlabsvnLocal2\\meshlab\\src\\distrib\\meshlab.exe";
 	//QString exePaths = "E:/Codes/meshlabsvnLocal2/meshlab/src/distrib/meshlab.exe";
-	QString exePaths = "D:\\LargeV\\FusionAnalyser\\FusionAnalyser.exe";
+	//QString exePaths = "D:\\LargeV\\FusionAnalyser\\FusionAnalyser.exe";
+	//QString exePaths = "D:/Notepad++/notepad++.exe";
+	QString exePaths = QCoreApplication::applicationDirPath()+ "/MeshLab/meshlab.exe";
+
 	return _launchExternalSoftware(exePaths);
 }
 
@@ -93,80 +85,77 @@ void QtEmbedOutDemo::_clearProcessByProcessName(qint64 processid)
 bool QtEmbedOutDemo::_launchExternalSoftware(QString exePath)
 {
 	//启动外部程序
-	//m_process = new QProcess(this);
-	connect(this, SIGNAL(startEmbed(qint64)), this, SLOT(on_processStarted(qint64)));
-	//m_process->setParent(this);
-	/*QStringList arg;
+	m_process = new QProcess(this);
+	connect(m_process, &QProcess::started, this, &QtEmbedOutDemo::on_processStarted);
+	m_process->setParent(this);
+	QStringList arg;
 	arg << "";
-	QString exeName = exePath.mid(exePath.lastIndexOf("\\"));
-	std::string strr = exeName.mid(2).toStdString();
-	const char* ch = strr.c_str();
+	QString exeName = exePath.mid(exePath.lastIndexOf("/"));
+	std::string str = exeName.mid(1).toStdString();
+	const char* ch = str.c_str();
 	qint64 processid = GetProcessidFromName(ch);
 	if (processid > 0)
-		_clearProcessByProcessName(processid);*/
+		_clearProcessByProcessName(processid);
 
+	m_process->setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments* args) {
+		args->startupInfo->wShowWindow = SW_HIDE;
+		args->startupInfo->dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+		});
+	m_process->start(exePath, QStringList());
+	return true;
+
+
+	/*QString program = exePath;
 	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
 	si.cb = sizeof(STARTUPINFO);
-	si.lpReserved = NULL;
-	si.lpDesktop = NULL;
-	si.lpTitle = NULL;
+	GetStartupInfo(&si);
+	si.wShowWindow = SW_HIDE;
 	si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-	si.wShowWindow = SW_HIDE | SW_MINIMIZE;
-	si.cbReserved2 = NULL;
-	si.lpReserved2 = NULL;
-	std::wstring str = exePath.toStdWString();
-	startret = CreateProcess(NULL, (LPTSTR)str.c_str(), NULL, NULL, FALSE, CREATE_SUSPENDED | CREATE_NO_WINDOW, NULL, NULL, &si, &pi);
-	if (!startret)
+
+	if (!CreateProcess(NULL, (LPWSTR)program.utf16(), NULL, NULL, TRUE, NULL, NULL, NULL, &si, &pi))
 	{
 		qDebug() << "create process fail";
-		return false;
 	}
-	m_chlidProcessid = pi.dwProcessId;
-	emit startEmbed(m_chlidProcessid);
-	if (m_pfthrd)
-		m_pfthrd->start();
-	return true;
+	return true;*/
+
+
+	/*QString program = exePath.toLatin1();
+	STARTUPINFO si = { sizeof(si) };
+	PROCESS_INFORMATION pi;
+	si.dwFlags = STARTF_USESHOWWINDOW ;
+	si.wShowWindow = false;
+	CreateProcess(NULL, (LPWSTR)program.toStdWString().c_str(), NULL, NULL, FALSE, CREATE_NEW_CONSOLE, NULL, NULL, &si, &pi);
+	return true;*/
+	
 }
 
 //嵌入外部程序
-void QtEmbedOutDemo::on_processStarted(qint64 _chlidProcessid)
+void QtEmbedOutDemo::on_processStarted()
 {
-	if (_chlidProcessid == 0)
+	qint64 id = 0;
+	if (m_process)
 	{
-		QMessageBox::information(NULL, "提示", "程序没有启动");
-		return;
+		id = m_process->processId();//如果程序没有运行，将会返回0
+		if (id == 0)
+		{
+			QMessageBox::information(NULL, "提示", "程序没有启动");
+			return;
+		}
 	}
-
-    ::ResumeThread((HANDLE)pi.hThread);
-	Sleep(4000);
-
+	
+	Sleep(1500);
+	//qDebug() << "Status: " << m_process->state();
 	HWND mainwindowHwnd = nullptr;
-	for (int i= 0; i < 20; i++)
+	while (1)
 	{
-		mainwindowHwnd = FindMainWindow(_chlidProcessid);
+		mainwindowHwnd = FindMainWindow(id);
 		qDebug() << "mainwindowHwnd: " << mainwindowHwnd;
 		if (mainwindowHwnd)
 			break;
 	}
-
-	/*HWND mainwindowHwnd = nullptr;
-	while (true)
-	{
-		HWND mainwindowHwnd = FindMainWindow(_chlidProcessid);
-		qDebug() << "mainwindowHwnd: " << mainwindowHwnd;
-		if (!mainwindowHwnd)
-		{
-			qDebug() << "get handle fail";
-		}
-		else
-		{
-			qDebug() << "get handle success";
-			break;
-		}
-	}*/
 	
 
-	//test1
 	//ShowWindow(mainwindowHwnd, SW_HIDE);
 	//WId wid = (WId)mainwindowHwnd;
 	//m_window = QWindow::fromWinId(wid);
@@ -174,9 +163,8 @@ void QtEmbedOutDemo::on_processStarted(qint64 _chlidProcessid)
 	//ui.scrollArea->setWidget(m_widget);
 	//ui.scrollArea->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
-
-	//test2
-	m_window = new QWindow();
+	//m_window = new QWindow();
+	//ShowWindow(mainwindowHwnd, SW_SHOWMAXIMIZED);
 	m_window = QWindow::fromWinId((WId)mainwindowHwnd);//windows的代理窗口
 	m_window->setFlags(Qt::FramelessWindowHint);//去除窗口
 
@@ -185,6 +173,9 @@ void QtEmbedOutDemo::on_processStarted(qint64 _chlidProcessid)
 	m_widget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 	m_widget->adjustSize();
 	ui.verticalLayout->addWidget(m_widget);
+	if (m_pfthrd)
+		m_pfthrd->start();
+
 }
 
 void QtEmbedOutDemo::on_sendClicked()
@@ -199,10 +190,5 @@ void QtEmbedOutDemo::on_revDataFunc(QString msg)
 	ui.label_rev->update();
 }
 
-void QtEmbedOutDemo::closeEvent(QCloseEvent* event)
-{
-	emit updateFusionError();
-	emit updateFusionError2();
-}
 
 
