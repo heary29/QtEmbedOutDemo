@@ -136,7 +136,7 @@ void QtEmbedOutDemo::on_processStarted()
 		id = m_process->processId();//如果程序没有运行，将会返回0
 		if (id == 0)
 		{
-			QMessageBox::information(NULL, "提示", "程序没有启动");
+			QMessageBox::information(NULL, "tips", "start process fail");
 			return;
 		}
 	}
@@ -144,7 +144,7 @@ void QtEmbedOutDemo::on_processStarted()
 	Sleep(1500);
 	qDebug() << "Status: " << m_process->state();
 	HWND mainwindowHwnd = nullptr;
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 200; i++)
 	{
 		mainwindowHwnd = FindMainWindow(id);
 		qDebug() << "mainwindowHwnd: " << mainwindowHwnd;
@@ -153,7 +153,7 @@ void QtEmbedOutDemo::on_processStarted()
 	}
 	if (mainwindowHwnd == nullptr)
 	{
-		QMessageBox::information(NULL, "提示", "获取程序句柄失败");
+		QMessageBox::information(NULL, "tips", "get handle fail");
 		return;
 	}
 
