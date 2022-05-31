@@ -86,9 +86,7 @@ bool QtEmbedOutDemo::_launchExternalSoftware(QString exePath)
 	//启动外部程序
 	m_process = new QProcess(this);
 	connect(m_process, &QProcess::started, this, &QtEmbedOutDemo::on_processStarted);
-	m_process->setParent(this);
-	QStringList arg;
-	arg << "";
+
 	QString exeName = exePath.mid(exePath.lastIndexOf("/"));
 	std::string str = exeName.mid(1).toStdString();
 	const char* ch = str.c_str();
@@ -144,14 +142,19 @@ void QtEmbedOutDemo::on_processStarted()
 	}
 	
 	Sleep(1500);
-	//qDebug() << "Status: " << m_process->state();
+	qDebug() << "Status: " << m_process->state();
 	HWND mainwindowHwnd = nullptr;
-	while (1)
+	for (int i = 0; i < 20; i++)
 	{
 		mainwindowHwnd = FindMainWindow(id);
 		qDebug() << "mainwindowHwnd: " << mainwindowHwnd;
 		if (mainwindowHwnd)
 			break;
+	}
+	if (mainwindowHwnd == nullptr)
+	{
+		QMessageBox::information(NULL, "提示", "获取程序句柄失败");
+		return;
 	}
 
 	m_window = QWindow::fromWinId((WId)mainwindowHwnd);//windows的代理窗口
