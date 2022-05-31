@@ -9,10 +9,6 @@ EmbedThreadSev::EmbedThreadSev(QObject* parent)
 	  m_bconnected_ = false;
 	  m_bend_ = false;
 	  _index_ = 0;
-
-	  handleEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
-	  memset(&op, 0, sizeof(op));
-	  op.hEvent = handleEvent;
 }
 
 EmbedThreadSev::~EmbedThreadSev()
@@ -22,8 +18,6 @@ EmbedThreadSev::~EmbedThreadSev()
 		DisconnectNamedPipe(m_hPipe_);
 		CloseHandle(m_hPipe_);
 	}
-
-	CloseHandle(handleEvent);
 }
 
 void EmbedThreadSev::Stop()
@@ -68,41 +62,6 @@ void EmbedThreadSev::run()
 				}
 			}
 		} while (0);
-
-		//do
-		//{
-		//	if (!m_bconnected_)
-		//	{
-		//		if (m_hPipe_ == nullptr)
-		//		{
-		//			m_hPipe_ = CreateNamedPipe(TEXT("//./pipe/QOutPipe"), PIPE_ACCESS_DUPLEX, FILE_FLAG_OVERLAPPED, 1, 0, 0, 1000, NULL);
-		//			if (INVALID_HANDLE_VALUE == m_hPipe_)
-		//			{
-		//				m_hPipe_ = NULL;
-		//				qDebug() << "CreateNamedPipe QOutPipe failed!";
-		//				break;
-		//			}
-		//		}
-
-		//		qDebug() << "Server is now running ......";
-		//		if (m_hPipe_ != nullptr ) //客户机的连接
-		//		{
-		//			ConnectNamedPipe(m_hPipe_, &op);
-		//			switch (GetLastError())
-		//			{
-		//				// The overlapped connection in progress. 
-		//				case ERROR_IO_PENDING:
-		//					break;
-		//				// Client is already connected, so signal an event.
-		//				case ERROR_PIPE_CONNECTED:
-		//					m_bconnected_ = true;
-		//					break; 
-		//				default:
-		//					qDebug() << "ConnectNamedPipe failed with %d./n" << GetLastError();
-		//			}
-		//		}
-		//	}
-		//} while (0);
 	}
 }
 

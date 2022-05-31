@@ -1,7 +1,6 @@
 #include "QtEmbedOutDemo.h"
 #include "getWindowUtil.h"
 #include <qDebug>
-#include <QDir>
 
 
 QtEmbedOutDemo::QtEmbedOutDemo(QWidget *parent)
@@ -67,10 +66,10 @@ bool QtEmbedOutDemo::startEmbed(QString exePath)
 	//QString exePaths = "D:\\CMake\\bin\\cmake-gui.exe";
 	//QString exePaths = "C:\\Users\\yangchunhai-ls\\Desktop\\Release0523\\Release\\MeshLab\\meshlab.exe";
 	//QString exePaths = "E:\\Codes\\meshlabsvnLocal2\\meshlab\\src\\distrib\\meshlab.exe";
-	//QString exePaths = "E:/Codes/meshlabsvnLocal2/meshlab/src/distrib/meshlab.exe";
+	QString exePaths = "E:/Codes/meshlabsvnLocal2/meshlab/src/distrib/meshlab.exe";
 	//QString exePaths = "D:\\LargeV\\FusionAnalyser\\FusionAnalyser.exe";
 	//QString exePaths = "D:/Notepad++/notepad++.exe";
-	QString exePaths = QCoreApplication::applicationDirPath()+ "/MeshLab/meshlab.exe";
+	//QString exePaths = QCoreApplication::applicationDirPath()+ "/MeshLab/meshlab.exe";
 
 	return _launchExternalSoftware(exePaths);
 }
@@ -154,17 +153,7 @@ void QtEmbedOutDemo::on_processStarted()
 		if (mainwindowHwnd)
 			break;
 	}
-	
 
-	//ShowWindow(mainwindowHwnd, SW_HIDE);
-	//WId wid = (WId)mainwindowHwnd;
-	//m_window = QWindow::fromWinId(wid);
-	//m_widget = QWidget::createWindowContainer(m_window); //第二个参数是作为window的父类，也可以用layout，此处就不解
-	//ui.scrollArea->setWidget(m_widget);
-	//ui.scrollArea->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-
-	//m_window = new QWindow();
-	//ShowWindow(mainwindowHwnd, SW_SHOWMAXIMIZED);
 	m_window = QWindow::fromWinId((WId)mainwindowHwnd);//windows的代理窗口
 	m_window->setFlags(Qt::FramelessWindowHint);//去除窗口
 
@@ -173,6 +162,7 @@ void QtEmbedOutDemo::on_processStarted()
 	m_widget->setSizePolicy(QSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding));
 	m_widget->adjustSize();
 	ui.verticalLayout->addWidget(m_widget);
+	
 	if (m_pfthrd)
 		m_pfthrd->start();
 
