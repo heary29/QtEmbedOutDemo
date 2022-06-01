@@ -144,7 +144,14 @@ void QtEmbedOutDemo::on_processStarted()
 	Sleep(1500);
 	qDebug() << "Status: " << m_process->state();
 	HWND mainwindowHwnd = nullptr;
-	for (int i = 0; i < 200; i++)
+	while (1)
+	{
+		mainwindowHwnd = FindMainWindow(id);
+		qDebug() << "mainwindowHwnd: " << mainwindowHwnd;
+		if (mainwindowHwnd)
+			break;
+	}
+	/*for (int i = 0; i < 2000; i++)
 	{
 		mainwindowHwnd = FindMainWindow(id);
 		qDebug() << "mainwindowHwnd: " << mainwindowHwnd;
@@ -155,7 +162,7 @@ void QtEmbedOutDemo::on_processStarted()
 	{
 		QMessageBox::information(NULL, "tips", "get handle fail");
 		return;
-	}
+	}*/
 
 	m_window = QWindow::fromWinId((WId)mainwindowHwnd);//windows的代理窗口
 	m_window->setFlags(Qt::FramelessWindowHint);//去除窗口
